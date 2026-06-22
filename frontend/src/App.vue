@@ -17,7 +17,6 @@
 
     <!-- Main Content -->
     <main class="main">
-      <!-- Loading -->
       <div v-if="loading" class="loading">Loading...</div>
 
       <!-- Products Page -->
@@ -40,8 +39,6 @@
       <section v-if="currentPage === 'orders'" class="section">
         <div class="card">
           <h2>Orders</h2>
-
-          <!-- Create Order Form -->
           <div class="form-section">
             <h3>Create New Order</h3>
             <form @submit.prevent="createOrder" class="form">
@@ -53,8 +50,6 @@
               <button type="submit" class="btn btn-primary">Create Order</button>
             </form>
           </div>
-
-          <!-- Orders List -->
           <div class="table-container">
             <table v-if="orders.length > 0">
               <thead>
@@ -75,11 +70,7 @@
                   <td>${{ order.total?.toFixed(2) }}</td>
                   <td><span :class="['status', order.status]">{{ order.status }}</span></td>
                   <td>
-                    <button
-                      v-if="order.status === 'pending'"
-                      class="btn btn-small btn-success"
-                      @click="payOrder(order)"
-                    >Pay Now</button>
+                    <button v-if="order.status === 'pending'" class="btn btn-small btn-success" @click="payOrder(order)">Pay Now</button>
                   </td>
                 </tr>
               </tbody>
@@ -163,6 +154,7 @@ import axios from 'axios'
 const API_URL = import.meta.env.VITE_API_URL || 'http://20.195.98.198:8080/api'
 
 export default {
+  name: 'App',
   data() {
     return {
       currentPage: 'products',
@@ -190,6 +182,7 @@ export default {
     }
   },
   mounted() {
+    console.log('App mounted, API_URL:', API_URL)
     this.loadData('products')
   },
   methods: {
@@ -200,7 +193,6 @@ export default {
           const res = await axios.get(`${API_URL}/products`)
           this.products = res.data || []
         } else if (page === 'orders') {
-          // Also load products for the order form
           if (this.products.length === 0) {
             const prodRes = await axios.get(`${API_URL}/products`)
             this.products = prodRes.data || []
@@ -391,6 +383,7 @@ body {
 .stock {
   color: #666;
   font-size: 0.9em;
+  margin-bottom: 12px;
 }
 
 .btn {
@@ -556,31 +549,14 @@ tr:hover {
 }
 
 @keyframes slideIn {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }
 
 @media (max-width: 768px) {
-  .header {
-    padding: 15px 20px;
-  }
-
-  .main {
-    padding: 20px;
-  }
-
-  .nav {
-    flex-wrap: wrap;
-  }
-
-  .form {
-    flex-direction: column;
-  }
+  .header { padding: 15px 20px; }
+  .main { padding: 20px; }
+  .nav { flex-wrap: wrap; }
+  .form { flex-direction: column; }
 }
 </style>
