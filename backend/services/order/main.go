@@ -33,9 +33,26 @@ func main() {
 		fmt.Fprintf(w, `{"status":"healthy","service":"order-service"}`)
 	})
 
-	// Get all orders
+	// Get all orders or Create order (POST)
 	mux.HandleFunc("/orders", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
+		if r.Method == http.MethodPost {
+			var order Order
+			if err := json.NewDecoder(r.Body).Decode(&order); err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				fmt.Fprintf(w, `{"error":"invalid request"}`)
+				return
+			}
+			order.ID = fmt.Sprintf("%d", len(orders)+1)
+			order.CreatedAt = time.Now()
+			if order.Status == "" {
+				order.Status = "pending"
+			}
+			orders = append(orders, order)
+			w.WriteHeader(http.StatusCreated)
+			json.NewEncoder(w).Encode(order)
+			return
+		}
 		json.NewEncoder(w).Encode(orders)
 	})
 

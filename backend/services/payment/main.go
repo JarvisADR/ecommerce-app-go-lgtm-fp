@@ -25,6 +25,10 @@ var payments = []Payment{
 
 func getPayments(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	if r.Method == http.MethodPost {
+		processPayment(w, r)
+		return
+	}
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(payments)
 }
