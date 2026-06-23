@@ -1127,8 +1127,8 @@
     "list": [
       {
         "current": {
-          "text": "Loki-Faro",
-          "value": "loki-faro"
+          "text": "Loki",
+          "value": "loki"
         },
         "includeAll": false,
         "label": "Loki Datasource",

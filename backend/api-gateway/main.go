@@ -46,6 +46,13 @@ func main() {
 		fmt.Fprintf(w, `{"status":"healthy","service":"api-gateway"}`)
 	})
 
+	// Test endpoint that returns 500
+	mux.HandleFunc("/api/error", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, `{"error":"internal server error","message":"this is a test error"}`)
+	})
+
 	productURL, _ := url.Parse("http://product-service.ecommerce.svc.cluster.local:8080")
 	mux.HandleFunc("/api/products/", proxyHandler(productURL, "/api"))
 	mux.HandleFunc("/api/products", proxyHandler(productURL, "/api"))

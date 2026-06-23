@@ -431,13 +431,18 @@ export default {
       return icons[cat] || '📦'
     },
     triggerError() {
+      // Trigger HTTP 404
+      axios.get(`${API_URL}/products/non-existent-id-999`).catch(() => {})
+      // Trigger HTTP 500
+      axios.get(`${API_URL}/error`).catch(() => {})
+      // Trigger JS exception
       try {
         const obj = null
         obj.nonExistentMethod()
       } catch (err) {
         getFaro()?.api.pushError(err)
         getFaro()?.api.pushLog(['[TEST ERROR] Manually triggered error for testing'], { level: 'error' })
-        this.showNotification('Test error triggered! Check Grafana Faro dashboard.', 'error')
+        this.showNotification('Errors triggered! (404 + 500 + Exception)', 'error')
         throw err
       }
     },
