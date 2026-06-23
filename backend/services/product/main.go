@@ -35,6 +35,7 @@ var products = []Product{
 
 func main() {
 	mux := http.NewServeMux()
+	db := observability.NewTracedDB("product-service")
 
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -45,11 +46,13 @@ func main() {
 	mux.HandleFunc("/products", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		log.Printf("[PRODUCT] Returning %d products", len(products))
+		db.Query(r.Context(), "products", "SELECT", "*")
 		json.NewEncoder(w).Encode(products)
 	})
 
 	mux.HandleFunc("/products/", func(w http.ResponseWriter, r *http.Request) {
 		id := r.URL.Path[len("/products/"):]
+		db.Query(r.Context(), "products", "SELECT", "id="+id)
 		for _, p := range products {
 			if p.ID == id {
 				w.Header().Set("Content-Type", "application/json")

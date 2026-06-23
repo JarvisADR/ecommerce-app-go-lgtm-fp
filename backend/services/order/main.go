@@ -48,6 +48,7 @@ func getUserServiceURL() string {
 func main() {
 	mux := http.NewServeMux()
 	httpClient := observability.TracedHTTPClient()
+	db := observability.NewTracedDB("order-service")
 
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -88,6 +89,7 @@ func main() {
 
 			orders = append(orders, order)
 			log.Printf("[ORDER] Created order=%s user=%s items=%d total=%.2f", order.ID, order.UserID, len(order.Items), order.Total)
+			db.Insert(r.Context(), "orders", order.ID)
 
 			// Auto-process payment (call payment-service)
 			paymentBody, _ := json.Marshal(map[string]interface{}{
@@ -126,6 +128,7 @@ func main() {
 		// GET - return orders, optionally filter by user_id
 		userID := r.URL.Query().Get("user_id")
 		if userID != "" {
+			db.Query(r.Context(), "orders", "SELECT", "user_id="+userID)
 			var userOrders []Order
 			for _, o := range orders {
 				if o.UserID == userID {
@@ -138,6 +141,7 @@ func main() {
 		}
 
 		log.Printf("[ORDER] Listing all orders count=%d", len(orders))
+		db.Query(r.Context(), "orders", "SELECT", "*")
 		json.NewEncoder(w).Encode(orders)
 	})
 
@@ -154,6 +158,7 @@ func main() {
 				if o.ID == id {
 					orders[i].Status = update.Status
 					log.Printf("[ORDER] Updated order=%s status=%s", id, update.Status)
+					db.Update(r.Context(), "orders", id, "status="+update.Status)
 					w.Header().Set("Content-Type", "application/json")
 					json.NewEncoder(w).Encode(orders[i])
 					return

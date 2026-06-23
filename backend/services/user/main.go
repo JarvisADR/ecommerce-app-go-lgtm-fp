@@ -125,11 +125,13 @@ func health(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	mux := http.NewServeMux()
+	db := observability.NewTracedDB("user-service")
 
 	mux.HandleFunc("/health", health)
 	mux.HandleFunc("/users", getUsers)
 	mux.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
 		id := r.URL.Path[len("/users/"):]
+		db.Query(r.Context(), "users", "SELECT", "id="+id)
 		for _, u := range users {
 			if fmt.Sprintf("%d", u.ID) == id {
 				w.Header().Set("Content-Type", "application/json")
@@ -141,8 +143,14 @@ func main() {
 		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprintf(w, `{"error":"user not found"}`)
 	})
-	mux.HandleFunc("/auth/login", handleLogin)
-	mux.HandleFunc("/auth/register", handleRegister)
+	mux.HandleFunc("/auth/login", func(w http.ResponseWriter, r *http.Request) {
+		db.Query(r.Context(), "users", "SELECT", "email="+r.URL.Query().Get("email"))
+		handleLogin(w, r)
+	})
+	mux.HandleFunc("/auth/register", func(w http.ResponseWriter, r *http.Request) {
+		handleRegister(w, r)
+		db.Insert(r.Context(), "users", "new_user")
+	})
 
 	observability.Run("user-service", mux)
 }

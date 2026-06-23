@@ -862,8 +862,37 @@
           "refId": "A"
         }
       ],
-      "title": "Mobile vs Desktop",
-      "type": "piechart"
+      "title": "Mobile (blue) vs Desktop (red)",
+      "type": "piechart",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": [
+            {"options": {"false": {"text": "🖥️ Desktop"}}, "type": "value"},
+            {"options": {"true": {"text": "📱 Mobile"}}, "type": "value"}
+          ],
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {"id": "byName", "options": "false"},
+            "properties": [{"id": "color", "value": {"fixedColor": "#ef4444", "mode": "fixed"}}, {"id": "displayName", "value": "🖥️ Desktop"}]
+          },
+          {
+            "matcher": {"id": "byName", "options": "true"},
+            "properties": [{"id": "color", "value": {"fixedColor": "#3b82f6", "mode": "fixed"}}, {"id": "displayName", "value": "📱 Mobile"}]
+          }
+        ]
+      }
     },
     {
       "collapsed": false,

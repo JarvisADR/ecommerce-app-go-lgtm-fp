@@ -41,6 +41,7 @@ func generateTxnID() string {
 
 func main() {
 	mux := http.NewServeMux()
+	db := observability.NewTracedDB("payment-service")
 
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -77,6 +78,7 @@ func main() {
 
 			log.Printf("[PAYMENT] Processed payment=%s order=%s amount=%.2f method=%s txn=%s",
 				payment.ID, payment.OrderID, payment.Amount, payment.Method, payment.TransactionID)
+			db.Insert(r.Context(), "payments", payment.ID)
 
 			w.WriteHeader(http.StatusCreated)
 			json.NewEncoder(w).Encode(payment)
