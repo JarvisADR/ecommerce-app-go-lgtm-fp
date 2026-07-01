@@ -1,0 +1,67 @@
+version: '3.8'
+
+# Mendefinisikan jaringan agar aplikasi bisa mengobrol dengan LGTM Stack
+networks:
+  lgtm_network:
+    external: true 
+
+services:
+  # 1. API GATEWAY
+  api-gateway:
+    image: haechanlovelove/ecommerce-api-gateway:latest
+    ports:
+      - "8080:8080"
+    networks:
+      - lgtm_network
+    environment:
+      - APP_ENV=production
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://alloy:4318 
+
+  # 2. PRODUCT SERVICE
+  product-service:
+    image: haechanlovelove/ecommerce-product:latest
+    networks:
+      - lgtm_network
+    environment:
+      - APP_ENV=production
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://alloy:4318
+
+  # 3. ORDER SERVICE
+  order-service:
+    image: haechanlovelove/ecommerce-order:latest
+    networks:
+      - lgtm_network
+    environment:
+      - APP_ENV=production
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://alloy:4318
+
+  # 4. USER SERVICE
+  user-service:
+    image: haechanlovelove/ecommerce-user:latest
+    networks:
+      - lgtm_network
+    environment:
+      - APP_ENV=production
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://alloy:4318
+
+  # 5. PAYMENT SERVICE
+  payment-service:
+    image: haechanlovelove/ecommerce-payment:latest
+    networks:
+      - lgtm_network
+    environment:
+      - APP_ENV=production
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://alloy:4318
+
+  # 6. FRONTEND VUE.JS
+  frontend:
+    image: haechanlovelove/ecommerce-frontend:latest
+    ports:
+      - "3000:3000"
+    networks:
+      - lgtm_network
+    environment:
+      - VITE_API_URL=http://20.198.226.84:8080/api
+      - VITE_FARO_COLLECTOR_URL=http://20.198.226.84:12347/collect
+      - VITE_APP_NAME=ecommerce-frontend
+      - VITE_APP_ENV=production
